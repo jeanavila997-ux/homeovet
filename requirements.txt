@@ -1,0 +1,5 @@
+# Agente Homeopático - Python 3.7+
+# Zero dependências obrigatórias!
+
+# Opcional (para interface colorida no terminal):
+# rich>=13.0.0

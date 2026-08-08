@@ -1,0 +1,17 @@
+# Arquivos de runtime (dados locais de aprendizado)
+data/feedback.json
+data/memoria_aprendizado.json
+data/historico_conversas.json
+homeovet_memory.json
+homeovet_export.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# SO
+.DS_Store
+Thumbs.db
