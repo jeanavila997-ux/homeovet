@@ -19,3 +19,6 @@ venv/
 # SO
 .DS_Store
 Thumbs.db
+
+# Artefato de build (gerado com npm run build)
+dist/

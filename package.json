@@ -1,0 +1,14 @@
+{
+  "name": "homeovet",
+  "version": "3.1.0",
+  "private": true,
+  "description": "HomeoVet — base educacional de homeopatia veterinária: dashboard estático (index.html) + CLI Python. Uso estritamente educacional.",
+  "scripts": {
+    "build": "node scripts/build_web.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
