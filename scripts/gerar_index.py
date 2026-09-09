@@ -125,6 +125,14 @@ TEMPLATE = r"""<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HomeoVet — farmacopeia didática de homeopatia veterinária</title>
+<script>
+/* aplica o tema salvo (ou a preferência do sistema) antes do primeiro paint */
+try {
+  const t = localStorage.getItem("homeovet_tema") ||
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro");
+  document.documentElement.dataset.tema = t;
+} catch (e) { document.documentElement.dataset.tema = "claro"; }
+</script>
 <style>
 :root {
   --papel: #EDF1E6;        /* fundo papel-sálvia */
@@ -139,8 +147,22 @@ TEMPLATE = r"""<!DOCTYPE html>
   --serif: "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
 }
+/* tema escuro — mesma farmacopeia na prateleira escura */
+html[data-tema="escuro"] {
+  --papel: #131C16;        /* fundo verde-tinta profundo */
+  --folha: #1C2820;        /* superfícies */
+  --tinta: #E7ECDF;        /* texto claro esverdeado */
+  --tinta-2: #A9B7A4;      /* secundário com contraste confortável */
+  --ambar: #D2A262;        /* frasco âmbar à luz */
+  --ambar-suave: #2C2517;  /* realce quente escuro */
+  --linha: #37463B;        /* hairlines visíveis no escuro */
+  --alerta: #E38B8B;       /* vermelho-veterinário claro */
+  color-scheme: dark;
+}
+html[data-tema="escuro"] #limpar-busca,
+html[data-tema="escuro"] #btn-tema { color: var(--tinta); }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; color-scheme: light; }
 body {
   margin: 0;
   background: var(--papel);
@@ -191,7 +213,7 @@ header.topo {
   color: var(--tinta);
 }
 #busca::placeholder { color: var(--tinta-2); }
-#limpar-busca {
+#limpar-busca, #btn-tema {
   border: 1px solid var(--linha);
   background: var(--folha);
   border-radius: var(--raio);
@@ -200,7 +222,7 @@ header.topo {
   color: var(--tinta-2);
   cursor: pointer;
 }
-#limpar-busca:hover { color: var(--tinta); border-color: var(--tinta-2); }
+#limpar-busca:hover, #btn-tema:hover { color: var(--tinta); border-color: var(--tinta-2); }
 
 /* ---------- herói ---------- */
 .hero { padding: 34px 28px 26px; border-bottom: 1px solid var(--linha); }
@@ -654,6 +676,7 @@ footer .restricao { color: var(--alerta); }
   <div class="busca">
     <input id="busca" type="search" placeholder="Buscar por sintoma, nome, origem ou sistema" aria-label="Buscar na base educacional">
     <button id="limpar-busca" type="button">Limpar</button>
+    <button id="btn-tema" type="button" aria-pressed="false" title="Alternar tema claro/escuro">Tema claro</button>
   </div>
 </header>
 
@@ -924,6 +947,18 @@ $("limpar-busca").addEventListener("click", () => {
   renderIndice();
   render();
 });
+
+// ---------- tema claro/escuro ----------
+function aplicarTema(tema) {
+  document.documentElement.dataset.tema = tema;
+  $("btn-tema").textContent = tema === "escuro" ? "Tema escuro" : "Tema claro";
+  $("btn-tema").setAttribute("aria-pressed", tema === "escuro" ? "true" : "false");
+  try { localStorage.setItem("homeovet_tema", tema); } catch (e) {}
+}
+$("btn-tema").addEventListener("click", () => {
+  aplicarTema(document.documentElement.dataset.tema === "escuro" ? "claro" : "escuro");
+});
+aplicarTema(document.documentElement.dataset.tema || "claro");
 
 // ---------- Tutor IA local (opcional) ----------
 // Espelho das listas de tutor_homeopatia_vet.py (fonte de verdade em Python).
