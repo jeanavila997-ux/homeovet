@@ -68,7 +68,8 @@ OLLAMA_URL = "http://localhost:11434"
 OLLAMA_TIMEOUT = 3  # segundos
 MODELO_TUTOR = "homeovet-tutor"        # criado via Modelfile.homeovet
 MODELO_TUTOR_FALLBACK = "nemotron-3-nano:4b"  # já instalado localmente
-MODELO_EMBEDDINGS = "nomic-embed-text"  # ollama pull nomic-embed-text
+MODELO_EMBEDDINGS = "embeddinggemma"  # modelo da doc oficial (POST /api/embed)
+MODELOS_EMBEDDINGS_CANDIDATOS = ["embeddinggemma", "nomic-embed-text", "mxbai-embed-large"]
 
 VERSÃO = "1.0.0"
 
@@ -235,23 +236,61 @@ def _cache_embedding_chave(texto: str, modelo: str) -> str:
     return hashlib.md5(f"{modelo}::{texto}".encode("utf-8")).hexdigest()
 
 
+# Cache do resolvedor de modelo de embeddings (evita consultar /api tags a cada chamada)
+_CACHE_RESOLVEDOR: Dict[str, Optional[str]] = {}
+
+
+def resolver_modelo_embeddings() -> Optional[str]:
+    """Detecta o primeiro modelo de embeddings instalado no Ollama."""
+    if "embed" not in _CACHE_RESOLVEDOR:
+        instalados = modelos_instalados()
+        _CACHE_RESOLVEDOR["embed"] = next(
+            (c for c in MODELOS_EMBEDDINGS_CANDIDATOS
+             if any(m.startswith(c) for m in instalados)),
+            None,
+        )
+    return _CACHE_RESOLVEDOR["embed"]
+
+
 def embedding(texto: str) -> Optional[List[float]]:
-    """Gera embedding do texto via Ollama, com cache local em runtime/."""
+    """Gera embedding do texto via Ollama, com cache local em runtime/.
+
+    Usa a API atual (POST /api/embed com campo "input") conforme
+    docs.ollama.com e cai para o endpoint legado (/api/embeddings com
+    campo "prompt") em versões antigas do Ollama.
+    """
+    modelo = resolver_modelo_embeddings()
+    if modelo is None:
+        return None
+
     cache = _carregar_runtime(EMBED_CACHE_FILE, {})
-    chave = _cache_embedding_chave(texto, MODELO_EMBEDDINGS)
+    chave = _cache_embedding_chave(texto, modelo)
     if chave in cache:
         return cache[chave]
 
-    resposta = _post_api("/api/embeddings", {
-        "model": MODELO_EMBEDDINGS,
-        "prompt": texto,
-    }, timeout=30)
-    if not resposta or "embedding" not in resposta:
+    vetor = None
+    # API atual: {"model", "input"} -> {"embeddings": [[...], ...]}
+    resposta = _post_api("/api/embed", {
+        "model": modelo,
+        "input": texto,
+    }, timeout=60)
+    if resposta and isinstance(resposta.get("embeddings"), list) and resposta["embeddings"]:
+        vetor = resposta["embeddings"][0]
+    else:
+        # Endpoint legado: {"model", "prompt"} -> {"embedding": [...]}
+        resposta = _post_api("/api/embeddings", {
+            "model": modelo,
+            "prompt": texto,
+        }, timeout=60)
+        if resposta and isinstance(resposta.get("embedding"), list):
+            vetor = resposta["embedding"]
+
+    if not vetor:
         return None
 
-    cache[chave] = resposta["embedding"]
+    cache[chave] = vetor
     _salvar_runtime(EMBED_CACHE_FILE, cache)
-    return resposta["embedding"]
+    return vetor
 
 
 def cosseno(a: List[float], b: List[float]) -> float:
@@ -357,7 +396,7 @@ def cmd_buscar(args):
     sem_vet: List[str] = []
     if semantica_ativa:
         consulta_vec = embedding(query)
-        sem_humano = _rank_semantico_humano(fonte_humano, consulta_vec, top_n * 2)
+        sem_humano = _rank_semantico_humano(fonte_humana, consulta_vec, top_n * 2)
         sem_vet = _rank_semantico_vet(fonte_vet, consulta_vec, top_n * 2)
 
     # ---- Fusão por base
