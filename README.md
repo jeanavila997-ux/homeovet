@@ -15,6 +15,8 @@ Conjunto de agentes inteligentes em **Python puro** (zero dependências obrigat�
 | `homeovet_cli.py` | 💻 **CLI completa** (v1.0.0): fichas técnicas, evidências, regulamentação, glossário, quiz e progresso — com interface colorida opcional via `rich` | Uso profissional veterinário |
 | `index.html` | 🌐 **Interface web standalone** (HTML/CSS/JS, sem backend) com busca, filtros, fichas, evidências e regulamentação | Qualquer usuário (basta abrir no navegador) |
 | `testes.py` | ✅ Testes automatizados do agente de busca | Desenvolvedores |
+| `Modelfile.homeovet` | 🧠 **Modelfile do tutor local** (Ollama): cria o modelo `homeovet-tutor` com o protocolo pedagógico e regras de segurança embutidas | Uso com IA local |
+| `scripts/gerar_index.py` | 🔧 Regenera o `index.html` a partir da base JSON (mantém dados e interface sincronizados) | Manutenção |
 
 ## 🧠 Funcionalidades
 
@@ -44,20 +46,52 @@ Conjunto de agentes inteligentes em **Python puro** (zero dependências obrigat�
 
 ## 🚀 Como Usar
 
+> **Windows**: se o comando `python` abrir a Microsoft Store, use o lançador `py`.
+
 ```bash
 # Agente de busca por sintomas
-python agente_homeopatico.py
+py agente_homeopatico.py            # (linux/macOS: python3)
 
 # Tutor educacional veterinário
-python tutor_homeopatia_vet.py
+py tutor_homeopatia_vet.py
 
 # CLI completa (opcional: pip install rich para interface colorida)
-python homeovet_cli.py
+py homeovet_cli.py ficha "Arnica Montana"
+py homeovet_cli.py buscar "contusão queda dor muscular"
+py homeovet_cli.py perguntar "O que é a Lei do Semelhante?"
+py homeovet_cli.py quiz
+py homeovet_cli.py exportar --formato md
 
 # Interface web — basta abrir o arquivo no navegador
 start index.html   # Windows
 open index.html    # macOS
 ```
+
+## 🤖 Modo IA Local (Opcional)
+
+Todo o projeto funciona em **Python puro, 100% offline**. Se o [Ollama](https://ollama.com)
+estiver rodando em `http://localhost:11434`, a CLI e a interface web ganham
+automaticamente (com **fallback completo** quando ele está desligado):
+
+- **Busca semântica** no comando `buscar` — embeddings `nomic-embed-text` (274 MB)
+  combinados com a busca léxica por fusão de rankings (RRF)
+- **Tutor RAG** no comando `perguntar` e no painel "Tutor IA local" da interface web —
+  respostas geradas por LLM local **ancoradas exclusivamente na base educacional**,
+  no formato pedagógico 📌→📚→📖→🔬→⚠️
+
+Configuração:
+
+```bash
+ollama pull nomic-embed-text                        # embeddings (busca semântica)
+ollama create homeovet-tutor -f Modelfile.homeovet  # tutor (base: nemotron-3-nano:4b)
+```
+
+- Sem o modelo `homeovet-tutor`, a CLI usa automaticamente o `nemotron-3-nano:4b` local.
+- Use `--sem-ia` para forçar o modo Python puro em qualquer comando.
+- A interface web conversa com o Ollama direto do navegador. Se o navegador bloquear
+  (CORS ao abrir o arquivo local), inicie o Ollama com `OLLAMA_ORIGINS=* ollama serve`.
+- **Segurança em camadas**: o bloqueio de diagnóstico/prescrição e a detecção de
+  emergências rodam por REGRAS, antes de qualquer LLM — nunca delegadas ao modelo.
 
 ## 📁 Estrutura
 
@@ -67,16 +101,19 @@ homeovet/
 ├── tutor_homeopatia_vet.py        # Tutor educacional veterinário
 ├── homeovet_cli.py                # CLI completa v1.0.0
 ├── index.html                     # Interface web standalone
+├── Modelfile.homeovet             # Modelfile do tutor local (Ollama)
 ├── testes.py                      # Testes automatizados
 ├── requirements.txt               # Zero dependências obrigatórias
 ├── PLANO.md                       # Plano original do agente de busca
 ├── ANALISE_COMPARATIVA.md         # Análise comparativa dos agentes
+├── scripts/
+│   └── gerar_index.py             # Regenera o index.html a partir da base JSON
 └── data/
     ├── remedios_homeopaticos.json # Base do agente de busca (24 remédios)
     └── tutor_homeopatia_vet.json  # Base do tutor (12 remédios + conceitos + evidências + regulamentação)
 ```
 
-Arquivos de runtime (feedback, memória, histórico) são gerados localmente e ignorados pelo `.gitignore`.
+Arquivos de runtime (feedback, memória, histórico e a pasta `runtime/` da CLI — progresso, favoritos, anotações, cache de embeddings) são gerados localmente e ignorados pelo `.gitignore`. Reexecute `py scripts/gerar_index.py` após alterar qualquer base JSON.
 
 ## 📦 Dependências
 

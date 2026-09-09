@@ -4,6 +4,10 @@ data/memoria_aprendizado.json
 data/historico_conversas.json
 homeovet_memory.json
 homeovet_export.json
+homeovet_export.md
+
+# Memória local da CLI (progresso, favoritos, anotações, cache de embeddings)
+runtime/
 
 # Python
 __pycache__/
