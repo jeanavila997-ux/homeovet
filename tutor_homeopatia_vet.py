@@ -16,6 +16,7 @@ Restrições éticas rigorosas:
 import json
 import os
 import re
+import unicodedata
 from datetime import datetime
 from difflib import SequenceMatcher
 from typing import List, Dict, Optional, Tuple
@@ -44,6 +45,17 @@ PALAVRAS_BLOQUEIO_DIAGNOSTICO = [
 def similaridade(a: str, b: str) -> float:
     """Calcula similaridade entre strings."""
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+
+def sem_acentos(texto: str) -> str:
+    """Remove acentos/diacríticos e converte para minúsculas.
+
+    Usado pelo filtro de segurança para que tentativas de diagnóstico ou
+    sintomas de emergência escritos SEM acento (ex.: "convulsionando",
+    "esta doente") também sejam detectados.
+    """
+    normalizado = unicodedata.normalize("NFD", texto.lower())
+    return "".join(c for c in normalizado if unicodedata.category(c) != "Mn")
 
 
 def limpar_tela():
@@ -162,10 +174,10 @@ class FiltroSeguranca:
     @staticmethod
     def detectar_tentativa_diagnostico(texto: str) -> Tuple[bool, List[str]]:
         """Detecta se o usuário está tentando obter diagnóstico/prescrição."""
-        texto_lower = texto.lower()
+        texto_norm = sem_acentos(texto)
         palavras_detectadas = []
         for palavra in PALAVRAS_BLOQUEIO_DIAGNOSTICO:
-            if palavra in texto_lower:
+            if sem_acentos(palavra) in texto_norm:
                 palavras_detectadas.append(palavra)
         return len(palavras_detectadas) > 0, palavras_detectadas
 
@@ -205,11 +217,16 @@ Posso ajudar com:
             "desmaio", "convulsão", "sangramento", "hemorragia",
             "vômito persistente", "diarreia com sangue", "não urina",
             "abdome distendido", "traumatismo", "fratura", "envenenamento",
-            "intoxicação", "paralisia", "não se move", "inconsciente"
+            "intoxicação", "paralisia", "não se move", "inconsciente",
+            # Radicais/flexões: cobrem formas sem acento e conjugadas
+            # (ex.: "convulsionando", "vomitando sangue", "nao consegue respirar")
+            "convuls", "vomitando sangue", "vômito com sangue",
+            "vomitando muito", "não consegue respirar", "não consegue andar",
+            "não consegue levantar", "envenenado", "intoxicado"
         ]
-        texto_lower = texto.lower()
+        texto_norm = sem_acentos(texto)
         for sintoma in sintomas_urgentes:
-            if sintoma in texto_lower:
+            if sem_acentos(sintoma) in texto_norm:
                 return f"""
 🚨 ATENÇÃO - POSSÍVEL EMERGÊNCIA
 ────────────────────────────────────────

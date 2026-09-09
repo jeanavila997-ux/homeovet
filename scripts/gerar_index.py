@@ -340,7 +340,11 @@ const SINTOMAS_URGENTES = [
   "desmaio", "convulsão", "sangramento", "hemorragia",
   "vômito persistente", "diarreia com sangue", "não urina",
   "abdome distendido", "traumatismo", "fratura", "envenenamento",
-  "intoxicação", "paralisia", "não se move", "inconsciente"
+  "intoxicação", "paralisia", "não se move", "inconsciente",
+  // Radicais/flexões: cobrem formas sem acento e conjugadas (a comparação usa norm())
+  "convuls", "vomitando sangue", "vômito com sangue",
+  "vomitando muito", "não consegue respirar", "não consegue andar",
+  "não consegue levantar", "envenenado", "intoxicado"
 ];
 
 const SYSTEM_RAG =
@@ -405,7 +409,7 @@ $("btn-perguntar").addEventListener("click", async () => {
   if (!pergunta) { mostrarResposta("Digite uma pergunta educacional acima.", "erro"); return; }
 
   // 1) Emergência — sempre antes de tudo
-  const urg = SINTOMAS_URGENTES.find(s => pergunta.toLowerCase().includes(s));
+  const urg = SINTOMAS_URGENTES.find(s => norm(pergunta).includes(norm(s)));
   if (urg) {
     mostrarResposta(
 `🚨 ATENÇÃO — POSSÍVEL EMERGÊNCIA
@@ -416,7 +420,7 @@ A homeopatia NÃO substitui atendimento de emergência.`, "resposta aviso-bloque
   }
 
   // 2) Tentativa de diagnóstico/prescrição — bloqueio por regras (nunca LLM)
-  const bloq = PALAVRAS_BLOQUEIO.find(p => pergunta.toLowerCase().includes(p));
+  const bloq = PALAVRAS_BLOQUEIO.find(p => norm(pergunta).includes(norm(p)));
   if (bloq) {
     mostrarResposta(
 `⚠️ AVISO DE SEGURANÇA

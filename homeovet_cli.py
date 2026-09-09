@@ -275,8 +275,11 @@ def chat_llm(system: str, user: str, modelo: str) -> Optional[str]:
             {"role": "user", "content": user},
         ],
         "stream": False,
+        # Modelos com "thinking" (ex.: nemotron) podem levar >150 s com RAG:
+        # desliga o raciocínio quando suportado e amplia o timeout.
+        "think": False,
         "options": {"temperature": 0.2, "num_ctx": 4096},
-    }, timeout=180)
+    }, timeout=300)
     if not resposta:
         return None
     conteudo = resposta.get("message", {}).get("content", "")
@@ -595,7 +598,7 @@ def _documentos_base() -> List[Tuple[str, str]]:
     return docs
 
 
-def _recuperar_contexto(pergunta: str, n: int = 6) -> List[str]:
+def _recuperar_contexto(pergunta: str, n: int = 4) -> List[str]:
     """Recupera os documentos mais relevantes (embeddings se ativo, senão léxico)."""
     docs = _documentos_base()
     consulta_vec = embedding(pergunta) if ia_disponivel() else None
