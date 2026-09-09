@@ -1,97 +1,66 @@
-# 🔄 RETOMAR — Sessão HomeoVet + Ambiente (2026-09-09)
+# 🔄 RETOMAR — HomeoVet + Ambiente (atualizado em 2026-09-09, encerramento da sessão)
 
-Checkpoint completo para retomar o trabalho de onde parou, com contexto limpo.
-
----
-
-## ✅ Concluído e enviado ao GitHub
-
-- Repo **https://github.com/jeanavila997-ux/homeovet** clonado em `C:/Users/JEANPC/homeovet`
-- Commit `a5eed21` enviado para `main` (push OK) com:
-  - **`homeovet_cli.py`** — CLI v1.0.0: `ficha`, `buscar`, `medicamentos`, `evidencias`,
-    `regulamentacao`, `glossario`, `perguntar`, `quiz` (15 perguntas), `progresso`,
-    `favoritos`, `anotacoes`, `historico`, `exportar`. Flag `--sem-ia`. Modo IA local
-    opcional: embeddings (`nomic-embed-text`) + fusão RRF na busca + RAG/LLM no
-    `perguntar` (fallback automático para o motor de regras do tutor)
-  - **`index.html`** — interface web standalone gerada por `scripts/gerar_index.py`
-    (4 abas, busca sem acentos, filtro por categoria, modal com ficha completa,
-    painel "Tutor IA local" falando direto com o Ollama pelo navegador)
-  - **`Modelfile.homeovet`** — `ollama create homeovet-tutor -f Modelfile.homeovet`
-  - README e .gitignore atualizados (seção "Modo IA Local", `py` no Windows, `runtime/`)
-- Testes originais: **7/7 passando** (`py testes.py`)
-- Smoke tests da CLI: todos OK (busca, fichas, quiz, favoritos, anotações, exportação,
-  histórico, bloqueio de prescrição)
-- API do Ollama testada direto: `nemotron-3-nano:4b` responde OK via `/api/chat` (1.8s)
+Checkpoint do estado real — tudo abaixo foi verificado nesta sessão.
 
 ---
 
-## ⚠️ Pendências do HomeoVet (nesta ordem)
+## ✅ Concluído
 
-1. **BUG do filtro de acentos** (segurança): "meu cachorro esta convulsionando" (sem
-   acento) NÃO dispara o aviso de emergência — a lista do tutor tem "convulsão" com acento.
-   Correção planejada:
-   - `tutor_homeopatia_vet.py`: adicionar `import unicodedata` (imports, linhas 16-21) +
-     função `sem_acentos()` após `similaridade()` (linha ~46) + aplicar em
-     `FiltroSeguranca.detectar_tentativa_diagnostico` e `verificar_sintomas_urgentes`
-     (comparar `sem_acentos(texto)` com `sem_acentos(palavra)`)
-   - `scripts/gerar_index.py` (template): usar `norm()` nas comparações de
-     `PALAVRAS_BLOQUEIO` e `SINTOMAS_URGENTES` no JS
-   - Regenerar: `py scripts/gerar_index.py`
-   - Testar: `py homeovet_cli.py perguntar "meu cachorro esta convulsionando"` → deve dar 🚨 emergência
-   - Commitar + push
-2. **LLM local — RESOLVIDO PARCIALMENTE pelo debug (bg_14)**: a chamada via urllib
-   FUNCIONA — `nemotron-3-nano:4b` respondeu no formato pedagógico correto
-   (📌→📚→📖→🔬), porém levou **~150 s** (o modelo gera "thinking" antes da resposta).
-   Causa provável da falha anterior: geração lenta estourando timeout/contexto.
-   Ações recomendadas: subir `timeout` do `chat_llm` em `homeovet_cli.py` de 180 → 300 s,
-   reduzir contexto RAG (n=6 → 4 documentos) e, se o Ollama suportar, desligar
-   thinking no payload (ex.: `"think": false`). Depois: testar
-   `py homeovet_cli.py perguntar "O que e a Lei do Semelhante?"` (sem --sem-ia),
-   **deletar `scripts/_debug_llm.py`** e commitar.
-3. **Verificar index.html no navegador** (ainda não feito): abrir
-   `file:///C:/Users/JEANPC/homeovet/index.html`, conferir abas, busca, modal e painel
-   do tutor com evidência visual (screenshot)
-4. **`ollama pull nomic-embed-text`** (274MB, não instalado) — busca semântica da CLI
-   ainda não foi exercitada de verdade (fallback léxico funciona)
+### HomeoVet (github.com/jeanavila997-ux/homeovet)
+- Commits `a5eed21` e `db45dcb` em `main`: CLI completa (`homeovet_cli.py` v1.0.0),
+  `index.html` standalone (gerado por `scripts/gerar_index.py`), `Modelfile.homeovet`,
+  README/.gitignore atualizados
+- Correções de segurança: filtro detecta emergências/bloqueios **sem acento**
+  ("convulsionando", "vomitando sangue") + radicais na lista de urgência
+- CLI: timeout do LLM 300s + `think: false` + contexto RAG 6→4 docs
+- Verificação: testes 7/7 ✅, smoke de todos os subcomandos ✅, quiz ✅,
+  interface web verificada visualmente (busca com "contusão" → Arnica ✅)
+- Backup no Google Drive: `G:\Meu Drive\homeovet-backup-20260909.zip`
+  (cliente Google Drive instalado, logado, unidade **G:** ativa)
+
+### Ambiente omp
+- Skills oficiais `docx`/`pdf`/`pptx`/`xlsx` instaladas em `~/.claude/skills/`
+- `desktop-commander` ativado em `~/.omp/agent/mcp.json`
+  (ativar com `/mcp reload` ou nova sessão)
+- `modelRoles.default` corrigido → `ollama/glm-5.3:cloud`
+  (o antigo apontava para `deepseek-r1:1.5b`, não instalado)
+- `~/.omp/agent/.env` criado; `OLLAMA_CLOUD_API_KEY` **preenchida e testada**
+  (19 modelos direto em `https://ollama.com/api/tags`, ex.: glm-5.3-flash,
+  gpt-oss:120b, nemotron-3-super) — provedor `ollama-cloud` ativa sozinho na
+  próxima sessão do omp
 
 ---
 
-## 🆕 Pedido novo em andamento: configurar o ambiente
+## ⏳ Pendências (acionáveis quando quiser)
 
-Pedido do usuário: **"instale skills, ferramentas, troca de modelos llm provedores, api, mcp"**
-
-Plano (não iniciado — leituras foram canceladas pela compactação):
-1. Ler docs do harness: `omp://models.md`, `omp://providers.md`, `omp://skills.md`,
-   `omp://mcp-config.md`, `omp://settings.md`, `omp://secrets.md`
-2. Levantar estado atual: skills instaladas, modelos Ollama
-   (locais: `nemotron-3-nano:4b`, `qwen2.5-coder:3b`, `tinydolphin`, `assistente-glm`;
-   clouds: `glm-5.3`, `kimi-k2.6/k2.7-code`, `mistral-large-3`, `qwen3.5`, `gpt-oss:120b`,
-   `gemma4:31b`, `nemotron-3-ultra/super`), MCPs montados
-3. Confirmar com o usuário o que exatamente instalar/configurar
-   (quais provedores padrão, quais chaves API ele tem, quais skills, quais MCPs)
+1. **`ollama pull nomic-embed-text`** (274 MB) — habilita a busca semântica real
+   na CLI HomeoVet (o fallback léxico funciona sem ele)
+2. **Colar as chaves restantes** em `~/.omp/agent/.env`:
+   - `NVIDIA_API_KEY` → build.nvidia.com (Login → Get API Key)
+   - `OPENROUTER_API_KEY` → openrouter.ai/keys
+   - `OPENAI_API_KEY` → platform.openai.com/api-keys
+   - `COPILOT_GITHUB_TOKEN` → github.com/settings/tokens (ou `/login github-copilot`)
+   Ao colar, avisar o agente para **testar cada provedor** e configurar os papéis
+   (`default`/`smol`/`slow`) com eles
+3. *(Opcional)* Enviar a pasta `C:/Users/JEANPC/estudos/09-homeopatia` para o
+   Google Drive (backup manual ou via cliente)
 
 ---
 
 ## 🛠️ Comandos úteis
 
 ```bash
-cd C:/Users/JEANPC/homeovet
-py testes.py                      # testes (7/7)
-py homeovet_cli.py --help         # ajuda da CLI
-py homeovet_cli.py quiz           # quiz interativo
-py scripts/gerar_index.py         # regenera index.html após mudar data/
-ollama list                       # modelos instalados
+cd C:/Users/JEANPC/homeovet        # projeto
+py testes.py                       # testes (7/7)
+py homeovet_cli.py --help          # CLI
+py scripts/gerar_index.py          # regenera index.html após mudar data/
+ollama list                        # modelos locais
+omp models                         # provedores/modelos disponíveis no omp
 ```
 
-Git: identidade usada nos commits → `-c user.name="jeanavila997-ux" -c user.email="jeanavila997@gmail.com"`
+Git: identidade dos commits → `-c user.name="jeanavila997-ux" -c user.email="jeanavila997@gmail.com"`
 
----
-
-## 📌 Contexto do negócio (para não perder)
-
-- **Real H** (loja do usuário, OneDrive/EMPRESAS/02-LOJA/02-REAL H): nutrição animal,
-  catálogos PDF, projeções ROI (PESOMAX, RECRIMAX, COMBO ÁGUAS, MÚLTIPLO 20)
-- HomeoVet é **educacional**: não diagnostica, não prescreve; filtro de segurança
-  por regras ANTES de qualquer LLM (nunca delegada ao modelo)
-- Hardware: RTX 3050 Laptop 4GB VRAM → modelos locais de 3-4B (nemotron-3-nano:4b OK;
-  evitar 7B+ local)
+**Contexto de negócio:** Real H = nutrição animal (OneDrive/EMPRESAS/02-LOJA/02-REAL H,
+catálogos e projeções ROI). HomeoVet = educacional, sem diagnóstico/prescrição;
+segurança por regras ANTES de qualquer LLM. Hardware: RTX 3050 4GB → modelos
+locais 3-4B (nemotron-3-nano:4b OK; evitar 7B+ local).
