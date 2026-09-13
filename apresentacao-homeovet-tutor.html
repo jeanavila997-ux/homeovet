@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeoVet Tutor — Assistente de Medicina Veterinária Homeopática</title>
+<style>
+  :root {
+    --sabio: #e9e4d5;
+    --sabio-escuro: #d9d2bd;
+    --tinta: #1f3a2d;
+    --tinta-clara: #2f5240;
+    --ambar: #c07a3a;
+    --ambar-claro: #e5b877;
+    --vermelho: #a33b2e;
+    --texto: #26332b;
+    --texto-suave: #5a6a5e;
+    --fundo: #f5f1e6;
+    --card: #fffdf7;
+    --borda: #d8cfba;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: var(--fundo);
+    color: var(--texto);
+    line-height: 1.65;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(160deg, var(--tinta) 0%, #2a4a39 60%, var(--tinta-clara) 100%);
+    color: var(--sabio);
+    padding: 72px 0 64px;
+    border-bottom: 5px solid var(--ambar);
+  }
+  .hero .kicker {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--ambar-claro);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 44px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  .hero .subtitle {
+    font-size: 19px;
+    color: #d8d0bc;
+    max-width: 640px;
+    margin-bottom: 24px;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: 10px; }
+  .badge {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    padding: 6px 14px;
+    border: 1px solid rgba(229,184,119,.45);
+    border-radius: 20px;
+    color: var(--ambar-claro);
+    background: rgba(0,0,0,.18);
+  }
+
+  /* Seções */
+  section { padding: 56px 0; }
+  section h2 {
+    font-size: 28px;
+    color: var(--tinta);
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+  section .lead {
+    font-size: 16px;
+    color: var(--texto-suave);
+    margin-bottom: 28px;
+    max-width: 720px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  }
+  .card h3 { font-size: 18px; color: var(--tinta); margin-bottom: 10px; }
+  .card p { font-size: 14.5px; color: var(--texto-suave); }
+  .card .icon { font-size: 26px; margin-bottom: 10px; display: block; }
+
+  /* Tabela de specs */
+  .specs {
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .specs table { width: 100%; border-collapse: collapse; }
+  .specs td, .specs th {
+    padding: 13px 18px;
+    text-align: left;
+    font-size: 14.5px;
+    border-bottom: 1px solid #eee6d6;
+  }
+  .specs th {
+    background: var(--sabio);
+    color: var(--tinta);
+    width: 200px;
+    font-weight: 600;
+  }
+  .specs tr:last-child td, .specs tr:last-child th { border-bottom: none; }
+
+  .mono { font-family: "Cascadia Code", "Consolas", monospace; font-size: 13.5px; }
+
+  /* Formato da resposta */
+  .formato ol { list-style: none; counter-reset: item; }
+  .formato li {
+    counter-increment: item;
+    padding: 12px 16px 12px 52px;
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  .formato li::before {
+    content: counter(item);
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    width: 26px; height: 26px;
+    background: var(--tinta);
+    color: var(--sabio);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+  }
+  .formato strong { color: var(--tinta); }
+
+  /* Aviso */
+  .aviso {
+    background: linear-gradient(160deg, #5b2420, var(--vermelho));
+    color: #f7e9e5;
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-top: 40px;
+  }
+  .aviso h3 { font-size: 20px; margin-bottom: 10px; }
+  .aviso p { font-size: 15px; color: #efd8d1; }
+
+  .comando {
+    background: #1f2a24;
+    color: #d8e6d4;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: "Cascadia Code", "Consolas", monospace;
+    font-size: 13.5px;
+    overflow-x: auto;
+    margin: 10px 0;
+  }
+  .comando .cmt { color: #7f9c82; }
+
+  .footer {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--texto-suave);
+    font-size: 13px;
+    border-top: 1px solid var(--borda);
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="kicker">Modelo de Chat · Assistente Local · Ollama</div>
+    <h1>HomeoVet Tutor</h1>
+    <p class="subtitle">Assistente educacional de medicina veterinária homeopática, executado localmente via Ollama. Ancora as respostas na base educacional do projeto HomeoVet — sem diagnósticos, sem prescrições.</p>
+    <div class="badges">
+      <span class="badge">2,8 GB — Q4_K_M</span>
+      <span class="badge">4.0B parâmetros</span>
+      <span class="badge">Rodando em GPU (RTX 3050 4GB)</span>
+      <span class="badge">100% local / offline</span>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <h2>O que é</h2>
+    <p class="lead">O <strong>homeovet-tutor</strong> é um modelo de linguagem especializado na área veterinária homeopática, criado a partir do Modelfile do projeto HomeoVet. Pelo nome — <em>homeovet</em> (homeopatia veterinária) + <em>tutor</em> — trata-se de um assistente de propósito educacional, fino-ajustado por meio de um prompt de sistema rígido e parâmetros conservadores.</p>
+
+    <div class="grid">
+      <div class="card">
+        <span class="icon">🎓</span>
+        <h3>Tutor educacional</h3>
+        <p>Responde dúvidas sobre saúde animal (cães, gatos, equinos, bovinos) em linguagem didática, com formato pedagógico estruturado.</p>
+      </div>
+      <div class="card">
+        <span class="icon">📚</span>
+        <h3>Ancorado na base educacional</h3>
+        <p>Não inventa informação: responde exclusivamente com o contexto da base do HomeoVet. Se não constar, declara explicitamente.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🛡️</span>
+        <h3>Segurança em camadas</h3>
+        <p>Bloqueio de diagnóstico/prescrição e detecção de emergências rodam por regras, antes de qualquer geração do LLM.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🔬</span>
+        <h3>Transparência científica</h3>
+        <p>Diferencia declaração de fabricante, evidência científica e conhecimento teórico — e sempre lembra a limitação da homeopatia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#efe9db;">
+  <div class="container">
+    <h2>Especificações técnicas</h2>
+    <p class="lead">Dados reais do modelo local, verificados via <span class="mono">ollama show</span>.</p>
+    <div class="specs">
+      <table>
+        <tr><th>Modelo base</th><td><span class="mono">nemotron-3-nano:4b</span> (arquitetura nemotron_h)</td></tr>
+        <tr><th>Tamanho / Quantização</th><td>2,8 GB · <span class="mono">Q4_K_M</span></td></tr>
+        <tr><th>Parâmetros</th><td>4.0 bilhões</td></tr>
+        <tr><th>Contexto (janela)</th><td><span class="mono">num_ctx 4096</span> (modelo suporta até 262144)</td></tr>
+        <tr><th>Temperatura</th><td><span class="mono">0.2</span> — respostas factuais, pouca criatividade</td></tr>
+        <tr><th>Capacidades</th><td>completion · tools · thinking</td></tr>
+        <tr><th>Licença</th><td>NVIDIA Open Model License Agreement</td></tr>
+        <tr><th>Execução</th><td>Local via Ollama · cabe em 4 GB de VRAM (GeForce RTX 3050 Laptop)</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Formato obrigatório da resposta</h2>
+    <p class="lead">Toda resposta segue uma estrutura fixa em português do Brasil, garantindo clareza e segurança:</p>
+    <div class="formato">
+      <ol>
+        <li><strong>📌 Resposta objetiva</strong> — 2 a 4 linhas diretas.</li>
+        <li><strong>📚 Explicação didática</strong> — desenvolvimento com o contexto disponível.</li>
+        <li><strong>📖 Fonte</strong> — declaração de fabricante, evidência científica ou conhecimento teórico.</li>
+        <li><strong>🔬 Evidências e limitações</strong> — o que a ciência diz (ou a falta de evidência).</li>
+        <li><strong>⚠️ Aviso</strong> — lembrete educacional final (sem diagnóstico/prescrição; consulte veterinário).</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section style="background:#efe9db;">
+  <div class="container">
+    <h2>Como usar</h2>
+    <p class="lead">O modelo é executado localmente via Ollama.</p>
+    <div class="comando"><span class="cmt"># Criar o modelo a partir do Modelfile (uma vez):</span><br>ollama create homeovet-tutor -f Modelfile.homeovet<br><br><span class="cmt"># Conversar:</span><br>ollama run homeovet-tutor "O que é a Lei do Semelhante?"</div>
+    <div class="comando"><span class="cmt"># Busca semântica (opcional):</span><br>ollama pull nomic-embed-text</div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="aviso">
+    <h3>⚠️ Aviso importante</h3>
+    <p>Este é um modelo de <strong>fins estritamente educacionais</strong>. Ele não diagnostica, não prescreve e não recomenda doses. Nunca substitui a consulta com um médico-veterinário. A eficácia da homeopatia não é sustentada por evidências científicas robustas (Bergh et al., 2021). Em qualquer sinal de emergência ou caso clínico real, procure um veterinário com urgência.</p>
+  </div>
+</div>
+
+<div class="footer">
+  HomeoVet Tutor · Projeto HomeoVet · <span class="mono">github.com/jeanavila997-ux/homeovet</span>
+</div>
+
+</body>
+</html>

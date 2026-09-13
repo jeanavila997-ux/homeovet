@@ -12,7 +12,7 @@
 # ⚠️ USO ESTRITAMENTE EDUCACIONAL — não diagnostica, não prescreve,
 #    não recomenda doses. Não substitui médico-veterinário.
 
-FROM nemotron-3-nano:4b
+FROM nemotron-nano-4k-gpu:latest
 
 # Respostas factuais e ancoradas no contexto (pouca "criatividade")
 PARAMETER temperature 0.2
